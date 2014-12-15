@@ -62,6 +62,8 @@ func (n *NetFlow5Record) Print() {
 func IPtoString(IP uint32) string {
 	s := strconv.FormatUint(uint64(IP), 16)
 	a, _ := hex.DecodeString(s)
-	s = fmt.Sprintf("%v.%v.%v.%v", a[0], a[1], a[2], a[3])
-	return s
+	if len(a) == 0 {
+		return fmt.Sprintf("EMPTY\n")
+	}
+	return fmt.Sprintf("%v.%v.%v.%v", a[0], a[1], a[2], a[3])
 }
