@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-const version string = "0.1"
+const version string = "0.2"
 const address string = "127.0.0.1"
 const port string = "2055"
 
@@ -48,6 +48,9 @@ func main() {
 	log.Print("Listening on ", connString)
 
 	defer ln.Close()
+
+	fmt.Printf("%11s%25s%25s", "Duration", "SrcAddr:SrcPort", "DstAddr:DstPort")
+	fmt.Printf("%10s%10s%10s\n", "Proto", "Packets", "Octets")
 
 	for {
 		var header NetFlow5

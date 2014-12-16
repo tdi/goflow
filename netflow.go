@@ -41,22 +41,30 @@ type NetFlow5Record struct {
 	Pad2     uint16
 }
 
+// Protocol translation as seen in netinet/in.h
+// not add protocols are covered, for the rest UNK(NUMBER) is returned
 func (n *NetFlow5Record) ProtoToString(Prot uint8) string {
 	switch int(Prot) {
 	case 17:
 		return "UDP"
 	case 6:
 		return "TCP"
+	case 1:
+		return "ICMP"
+	case 2:
+		return "IGMP"
+	case 8:
+		return "EGP"
 	}
-	return "UNK"
+	return fmt.Sprintf("UNK%d", int(Prot))
 }
 
 func (n *NetFlow5Record) Print() {
 	dur := fmt.Sprintf("%d", int(n.Last-n.First)/1000)
 	srcTup := fmt.Sprintf("%s:%d", IPtoString(n.SrcAddr), int(n.SrcPort))
 	dstTup := fmt.Sprintf("%s:%d", IPtoString(n.DstAddr), int(n.DstPort))
-	fmt.Printf("%5ss%25s%25s", dur, srcTup, dstTup)
-	fmt.Printf("%6s%6d%10d\n", n.ProtoToString(n.Prot), int(n.DPkts), int(n.DOctets))
+	fmt.Printf("%10ss%25s%25s", dur, srcTup, dstTup)
+	fmt.Printf("%10s%10d%10d\n", n.ProtoToString(n.Prot), int(n.DPkts), int(n.DOctets))
 }
 
 func IPtoString(IP uint32) string {
