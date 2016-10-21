@@ -1,17 +1,16 @@
-goflow
-======
+[![Build Status](https://travis-ci.org/tdi/goflow.svg?branch=master)](https://travis-ci.org/tdi/goflow)
 
-Version: 0.1
+# goflow
+
+Version: 0.4
 
 A simple NetFlow v5 checker.
 
-Installation
-============
+## Installation
 
 `go get github.com/tdi/goflow`
 
-CLI usage
-=========
+## CLI usage
 
 `goflow [-h] -H HOSTNAME -p PORT`
 
@@ -34,8 +33,7 @@ defaults: 127.0.0.1:2055 (UDP)
 
 
 
-AUTHOR
-======
+## AUTHOR
 
 Copyright (c) Dariusz Dwornikowski
 
