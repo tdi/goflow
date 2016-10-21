@@ -42,7 +42,6 @@ func setupUDPServer(connString string, c chan string) {
 		}
 		p := bytes.NewBuffer(buf)
 		err = binary.Read(p, binary.BigEndian, &header)
-		// log.Printf("%v\n", header)
 		if err != nil {
 			log.Fatal("Cannot read header from datagram")
 			continue
@@ -51,7 +50,6 @@ func setupUDPServer(connString string, c chan string) {
 			log.Println("Invalid packet, goflow only supports netflow v5")
 			continue
 		}
-		// log.Printf("dgram size %d from %s [%d] records", n, adr, header.Count)
 		// iterate over records, we are set after header after 24byte
 		// record is 48 bytes long
 		var record NetFlow5Record
