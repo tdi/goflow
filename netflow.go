@@ -6,7 +6,8 @@ import (
 	"strconv"
 )
 
-type NetFlow5 struct {
+// NetFlow5Header represents a 24 byte header
+type NetFlow5Header struct {
 	Version          uint16
 	Count            uint16
 	SysUptime        uint32
@@ -31,7 +32,7 @@ type NetFlow5Record struct {
 	SrcPort  uint16
 	DstPort  uint16
 	Pad1     uint8
-	TcpFlags uint8
+	TCPFlags uint8
 	Prot     uint8
 	Tos      uint8
 	SrcAs    uint16
@@ -41,9 +42,9 @@ type NetFlow5Record struct {
 	Pad2     uint16
 }
 
-// Protocol translation as seen in netinet/in.h
+// ProtoToString makes protocol translation as seen in netinet/in.h
 // not add protocols are covered, for the rest UNK(NUMBER) is returned
-func (n *NetFlow5Record) ProtoToString(Prot uint8) string {
+func ProtoToString(Prot uint8) string {
 	switch int(Prot) {
 	case 17:
 		return "UDP"
@@ -59,19 +60,20 @@ func (n *NetFlow5Record) ProtoToString(Prot uint8) string {
 	return fmt.Sprintf("UNK%d", int(Prot))
 }
 
-func (n *NetFlow5Record) Print() {
+func (n *NetFlow5Record) String() string {
 	dur := fmt.Sprintf("%d", int(n.Last-n.First)/1000)
 	srcTup := fmt.Sprintf("%s:%d", IPtoString(n.SrcAddr), int(n.SrcPort))
 	dstTup := fmt.Sprintf("%s:%d", IPtoString(n.DstAddr), int(n.DstPort))
-	fmt.Printf("%10ss%25s%25s", dur, srcTup, dstTup)
-	fmt.Printf("%10s%10d%10d\n", n.ProtoToString(n.Prot), int(n.DPkts), int(n.DOctets))
+	a := fmt.Sprintf("%10ss%25s%25s", dur, srcTup, dstTup)
+	b := fmt.Sprintf("%10s%10d%10d\n", ProtoToString(n.Prot), int(n.DPkts), int(n.DOctets))
+	return fmt.Sprintf("%s%s", a, b)
 }
 
 func IPtoString(IP uint32) string {
 	s := strconv.FormatUint(uint64(IP), 16)
 	a, _ := hex.DecodeString(s)
 	if len(a) == 0 {
-		return fmt.Sprintf("EMPTY\n")
+		return "EMPTY\n"
 	}
 	return fmt.Sprintf("%v.%v.%v.%v", a[0], a[1], a[2], a[3])
 }

@@ -10,14 +10,59 @@ import (
 	"os"
 )
 
-const version string = "0.2"
-const address string = "127.0.0.1"
-const port string = "2055"
+const (
+	version string = "0.4"
+	address string = "127.0.0.1"
+	port    string = "2055"
+)
 
-func print_help() {
+func printHelp() {
 	fmt.Printf("goflow version: %s\n", version)
 	fmt.Println("usage: goflow [-h] [-H HOST_NAME] [-p PORT]")
 	os.Exit(0)
+}
+
+func setupUDPServer(connString string, c chan string) {
+	listenAddress, err := net.ResolveUDPAddr("udp4", connString)
+	if err != nil {
+		log.Fatal(err)
+	}
+	conn, err := net.ListenUDP("udp", listenAddress)
+	defer conn.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for {
+		var header NetFlow5Header
+		buf := make([]byte, 1464)
+		_, _, err := conn.ReadFromUDP(buf)
+		if err != nil {
+			log.Println("Cannot read from UDP socket")
+			continue
+		}
+		p := bytes.NewBuffer(buf)
+		err = binary.Read(p, binary.BigEndian, &header)
+		// log.Printf("%v\n", header)
+		if err != nil {
+			log.Fatal("Cannot read header from datagram")
+			continue
+		}
+		if header.Version != uint16(5) {
+			log.Println("Invalid packet, goflow only supports netflow v5")
+			continue
+		}
+		// log.Printf("dgram size %d from %s [%d] records", n, adr, header.Count)
+		// iterate over records, we are set after header after 24byte
+		// record is 48 bytes long
+		var record NetFlow5Record
+		for i := 0; i < int(header.Count); i++ {
+			err = binary.Read(p, binary.BigEndian, &record)
+			if err != nil {
+				log.Printf("Could not read a packet")
+			}
+			c <- record.String()
+		}
+	}
 }
 
 func main() {
@@ -28,54 +73,18 @@ func main() {
 	flag.Parse()
 
 	if *helpFlag != false {
-		print_help()
+		printHelp()
 	}
-
 	connString := *addressFlag + ":" + *portFlag
-
-	udpAddress, err := net.ResolveUDPAddr("udp4", connString)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ln, err := net.ListenUDP("udp4", udpAddress)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print("Listening on ", connString)
-
-	defer ln.Close()
-
+	c := make(chan string)
+	go setupUDPServer(connString, c)
+	log.Printf("Listening on %s", connString)
 	fmt.Printf("%11s%25s%25s", "Duration", "SrcAddr:SrcPort", "DstAddr:DstPort")
 	fmt.Printf("%10s%10s%10s\n", "Proto", "Packets", "Octets")
-
 	for {
-		var header NetFlow5
-		var buf []byte = make([]byte, 1500)
-		_, _, err := ln.ReadFromUDP(buf)
-		if err != nil {
-			log.Print("Cannot read from UDP socket")
-			continue
-		}
-		p := bytes.NewBuffer(buf)
-		err = binary.Read(p, binary.BigEndian, &header)
-		if err != nil {
-			log.Print("Cannot read header from datagram")
-			continue
-		}
-		if header.Version != uint16(5) {
-			log.Fatal("goflow only support netflow 5")
-		}
-		//log.Printf("dgram size %d from %s [%d] records", n, adr, header.Count)
-		// iterate over records, we are set after header after 24byte
-		// record is 48 bytes
-		for i := 0; i < int(header.Count); i++ {
-			var record NetFlow5Record
-			err = binary.Read(p, binary.BigEndian, &record)
-			record.Print()
+		select {
+		case a := <-c:
+			fmt.Print(a)
 		}
 	}
 }
