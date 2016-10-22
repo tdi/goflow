@@ -43,7 +43,7 @@ func setupUDPServer(connString string, c chan string) {
 		p := bytes.NewBuffer(buf)
 		err = binary.Read(p, binary.BigEndian, &header)
 		if err != nil {
-			log.Fatal("Cannot read header from datagram")
+			log.Println("Cannot read header from datagram")
 			continue
 		}
 		if header.Version != uint16(5) {
