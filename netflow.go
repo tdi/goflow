@@ -60,6 +60,7 @@ func ProtoToString(Prot uint8) string {
 	return fmt.Sprintf("UNK%d", int(Prot))
 }
 
+//String() returns a string representation of a NetFlow record
 func (n *NetFlow5Record) String() string {
 	dur := fmt.Sprintf("%d", int(n.Last-n.First)/1000)
 	srcTup := fmt.Sprintf("%s:%d", IPtoString(n.SrcAddr), int(n.SrcPort))

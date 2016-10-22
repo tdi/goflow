@@ -59,7 +59,7 @@ func TestServer(t *testing.T) {
 		if err != nil {
 			t.Error("Could not send the record")
 		}
-		sent := fmt.Sprintf("%v", record)
+		sent := strings.Trim(fmt.Sprintf("%s", record.String()), "\n")
 		got := strings.Trim(<-c, "\n")
 		if sent != got {
 			t.Errorf("Expected %s to be equal to %s", sent, got)
