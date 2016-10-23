@@ -10,6 +10,8 @@ A simple NetFlow v5 checker.
 
 `go get github.com/tdi/goflow`
 
+or you can use pre-built images from [gobuilder.me/github.com/tdi/goflow](https://gobuilder.me/github.com/tdi/goflow) page. 
+
 ## CLI usage
 
 `goflow [-h] -H HOSTNAME -p PORT`
